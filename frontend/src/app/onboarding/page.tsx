@@ -97,9 +97,13 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     if (step === 3 && anchorPapers.length === 0) {
+      setError("");
       setAnchorLoading(true);
       getAnchorPapers()
-        .then((papers) => setAnchorPapers(papers))
+        .then((papers) => {
+          setAnchorPapers(papers);
+          setError("");
+        })
         .catch(() =>
           setError("Could not load anchor papers. You can skip this step.")
         )
@@ -109,9 +113,13 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     if (step === 4 && pairwisePairs.length === 0) {
+      setError("");
       setPairwiseLoading(true);
       getPairwisePapers()
-        .then((pairs) => setPairwisePairs(pairs))
+        .then((pairs) => {
+          setPairwisePairs(pairs);
+          setError("");
+        })
         .catch(() =>
           setError("Could not load comparisons. You can skip this step.")
         )
