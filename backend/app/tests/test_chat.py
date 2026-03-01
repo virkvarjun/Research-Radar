@@ -46,7 +46,7 @@ class TestGenerateAnswer:
         mock_response.choices = [MagicMock()]
         mock_response.choices[0].message.content = "The paper discusses attention mechanisms."
 
-        with patch("app.services.chat.OpenAI") as MockOpenAI:
+        with patch("openai.OpenAI") as MockOpenAI:
             mock_client = MagicMock()
             mock_client.chat.completions.create.return_value = mock_response
             MockOpenAI.return_value = mock_client
@@ -57,7 +57,7 @@ class TestGenerateAnswer:
     @pytest.mark.asyncio
     async def test_generate_answer_api_error(self):
         """Should return error message when API fails."""
-        with patch("app.services.chat.OpenAI") as MockOpenAI:
+        with patch("openai.OpenAI") as MockOpenAI:
             mock_client = MagicMock()
             mock_client.chat.completions.create.side_effect = Exception("API down")
             MockOpenAI.return_value = mock_client
@@ -73,7 +73,7 @@ class TestGenerateAnswer:
         mock_response.choices = [MagicMock()]
         mock_response.choices[0].message.content = None
 
-        with patch("app.services.chat.OpenAI") as MockOpenAI:
+        with patch("openai.OpenAI") as MockOpenAI:
             mock_client = MagicMock()
             mock_client.chat.completions.create.return_value = mock_response
             MockOpenAI.return_value = mock_client
