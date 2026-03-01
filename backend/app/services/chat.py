@@ -55,7 +55,7 @@ async def chat_with_paper(
 
     # Embed question
     q_embedding = await embed_text(question)
-    if not q_embedding:
+    if q_embedding is None:
         return ChatResponse(
             answer="Unable to process question.",
             citations=[],
@@ -64,7 +64,7 @@ async def chat_with_paper(
     # Rank chunks by similarity
     scored_chunks = []
     for chunk in chunks:
-        if chunk.embedding:
+        if chunk.embedding is not None:
             sim = cosine_similarity(q_embedding, chunk.embedding)
             scored_chunks.append((chunk, sim))
 

@@ -56,14 +56,14 @@ async def get_feed(
     # Get thread embeddings
     thread_embeddings = []
     for thread in user.threads:
-        if thread.embedding:
+        if thread.embedding is not None:
             thread_embeddings.append(thread.embedding)
 
     # Score each candidate
     scored = []
     now = datetime.now(timezone.utc)
     for paper in candidate_papers:
-        if not paper.embedding:
+        if paper.embedding is None:
             continue
 
         days_old = max(0, (now - paper.created_at).days) if paper.created_at else 0

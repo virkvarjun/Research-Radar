@@ -1,5 +1,7 @@
 """Onboarding endpoints."""
 
+import logging
+
 from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,6 +13,7 @@ from app.schemas.common import OnboardingAnswers, PaperOut
 from app.services.embeddings import embed_text, normalize_vector
 from app.services.ranking import update_user_vector
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/onboarding", tags=["onboarding"])
 
 
@@ -25,9 +28,13 @@ async def submit_onboarding(
     user.role = answers.role
     user.topics = answers.topics
 
-    # Create thread vectors from topics
+    # Create thread vectors from topics (graceful if embedding fails)
     for topic in answers.topics:
-        topic_embedding = await embed_text(topic)
+        try:
+            topic_embedding = await embed_text(topic)
+        except Exception as e:
+            logger.warning(f"Could not embed topic '{topic}': {e}")
+            topic_embedding = None
         thread = Thread(
             user_id=user.id,
             label=topic,
@@ -42,7 +49,7 @@ async def submit_onboarding(
             select(Paper).where(Paper.id == paper_id_str)
         )
         paper = result.scalar_one_or_none()
-        if paper and paper.embedding:
+        if paper and paper.embedding is not None:
             if label == "interested":
                 user_vector = update_user_vector(user_vector, paper.embedding, "like")
             elif label == "not_interested":
@@ -55,12 +62,12 @@ async def submit_onboarding(
         if winner_id:
             result = await db.execute(select(Paper).where(Paper.id == winner_id))
             winner = result.scalar_one_or_none()
-            if winner and winner.embedding:
+            if winner and winner.embedding is not None:
                 user_vector = update_user_vector(user_vector, winner.embedding, "like")
         if loser_id:
             result = await db.execute(select(Paper).where(Paper.id == loser_id))
             loser = result.scalar_one_or_none()
-            if loser and loser.embedding:
+            if loser and loser.embedding is not None:
                 user_vector = update_user_vector(user_vector, loser.embedding, "not_relevant")
 
     user.embedding = user_vector

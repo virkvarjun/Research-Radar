@@ -52,7 +52,7 @@ async def record_feedback(
             db.add(saved)
 
     # Update user vector
-    if paper.embedding and body.action in ("like", "save", "not_relevant"):
+    if paper.embedding is not None and body.action in ("like", "save", "not_relevant"):
         new_vector = update_user_vector(
             current=user.embedding,
             paper_embedding=paper.embedding,
@@ -111,7 +111,7 @@ async def email_feedback(
     # Update user vector
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
-    if user and paper.embedding and a in ("save", "skip", "not_relevant"):
+    if user and paper.embedding is not None and a in ("save", "skip", "not_relevant"):
         action_map = {"save": "save", "skip": "skip", "not_relevant": "not_relevant"}
         new_vector = update_user_vector(
             current=user.embedding,

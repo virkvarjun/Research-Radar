@@ -54,7 +54,7 @@ def score_paper(
 
     # User similarity
     user_sim = 0.0
-    if user_embedding:
+    if user_embedding is not None:
         user_sim = cosine_similarity(user_embedding, paper_embedding)
     explanation["user_similarity"] = round(user_sim, 4)
 

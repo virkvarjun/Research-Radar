@@ -49,11 +49,15 @@ def _embed_openai(texts: list[str]) -> list[list[float]]:
 
 
 async def embed_text(text: str) -> Optional[list[float]]:
-    """Embed a single text string."""
+    """Embed a single text string. Returns None on failure."""
     if not text or not text.strip():
         return None
-    results = await embed_texts([text])
-    return results[0] if results else None
+    try:
+        results = await embed_texts([text])
+        return results[0] if results else None
+    except Exception as e:
+        logger.error(f"Embedding failed for text '{text[:50]}...': {e}")
+        return None
 
 
 def paper_text_for_embedding(title: str, abstract: Optional[str] = None) -> str:

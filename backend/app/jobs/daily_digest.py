@@ -52,12 +52,12 @@ async def _generate_user_digest(db: AsyncSession, user: User) -> list[dict]:
     if not candidates:
         return []
 
-    thread_embeddings = [t.embedding for t in user.threads if t.embedding]
+    thread_embeddings = [t.embedding for t in user.threads if t.embedding is not None]
     now = datetime.now(timezone.utc)
 
     scored = []
     for paper in candidates:
-        if not paper.embedding:
+        if paper.embedding is None:
             continue
         days_old = max(0, (now - paper.created_at).days) if paper.created_at else 0
         score, explanation = score_paper(

@@ -129,10 +129,10 @@ async def get_related_papers(
     # Build query vectors: institution paper embeddings + user thread embeddings
     query_vectors = []
     for p in inst_papers:
-        if p.embedding:
+        if p.embedding is not None:
             query_vectors.append(p.embedding)
     for thread in user.threads:
-        if thread.embedding:
+        if thread.embedding is not None:
             query_vectors.append(thread.embedding)
 
     if not query_vectors:
@@ -142,7 +142,7 @@ async def get_related_papers(
     # Score each other paper by max similarity to any query vector
     scored = []
     for paper in other_papers:
-        if not paper.embedding:
+        if paper.embedding is None:
             continue
         max_sim = max(
             cosine_similarity(qv, paper.embedding) for qv in query_vectors
