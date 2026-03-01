@@ -21,6 +21,14 @@ class TestFeedbackSignature:
         sig = url.split("sig=")[1]
         assert verify_feedback_signature(str(user_id), str(paper_id), "save", sig)
 
+    def test_url_points_to_backend(self):
+        """Feedback URLs must point to backend_url, not app_url."""
+        user_id = uuid.uuid4()
+        paper_id = uuid.uuid4()
+        url = generate_feedback_url(user_id, paper_id, "save")
+        # Should contain the backend URL (port 8000 by default), not frontend (3000)
+        assert "localhost:8000" in url or "backend" in url
+
     def test_wrong_action_fails(self):
         user_id = uuid.uuid4()
         paper_id = uuid.uuid4()
@@ -59,7 +67,8 @@ class TestRenderDigestHtml:
         assert "Test Paper Two" in html
         assert "Alice" in html
         assert "Save" in html
-        assert "Skip" in html
+        assert "Not interested" in html
+        assert "View feed" in html
 
     def test_renders_empty(self):
         user_id = uuid.uuid4()
