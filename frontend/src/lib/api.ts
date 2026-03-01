@@ -76,6 +76,10 @@ export function getInstitutionPapers(institutionId: string) {
   return apiFetch<Paper[]>(`/university/${institutionId}/new`);
 }
 
+export function getRelatedPapers(institutionId: string) {
+  return apiFetch<Paper[]>(`/university/${institutionId}/related`);
+}
+
 // --- Papers ---
 export function getPaper(paperId: string) {
   return apiFetch<PaperDetail>(`/papers/${paperId}`);
