@@ -6,6 +6,7 @@ import PaperCard from "@/components/PaperCard";
 import {
   searchInstitutions,
   getInstitutionPapers,
+  getRelatedPapers,
   sendFeedback,
   type Institution,
   type Paper,
@@ -15,7 +16,8 @@ export default function UniversityPage() {
   const [query, setQuery] = useState("");
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [selectedInst, setSelectedInst] = useState<Institution | null>(null);
-  const [papers, setPapers] = useState<Paper[]>([]);
+  const [newPapers, setNewPapers] = useState<Paper[]>([]);
+  const [relatedPapers, setRelatedPapers] = useState<Paper[]>([]);
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
 
@@ -37,10 +39,15 @@ export default function UniversityPage() {
     setSelectedInst(inst);
     setLoading(true);
     try {
-      const data = await getInstitutionPapers(inst.id);
-      setPapers(data);
+      const [newData, relatedData] = await Promise.all([
+        getInstitutionPapers(inst.id),
+        getRelatedPapers(inst.id),
+      ]);
+      setNewPapers(newData);
+      setRelatedPapers(relatedData);
     } catch {
-      setPapers([]);
+      setNewPapers([]);
+      setRelatedPapers([]);
     } finally {
       setLoading(false);
     }
@@ -89,18 +96,18 @@ export default function UniversityPage() {
         )}
 
         {selectedInst && (
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
+          <div>
+            <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">
                   {selectedInst.name}
                 </h2>
-                <p className="text-sm text-gray-500">New papers from this institution</p>
               </div>
               <button
                 onClick={() => {
                   setSelectedInst(null);
-                  setPapers([]);
+                  setNewPapers([]);
+                  setRelatedPapers([]);
                 }}
                 className="text-sm text-blue-600 hover:underline"
               >
@@ -110,21 +117,59 @@ export default function UniversityPage() {
 
             {loading ? (
               <p className="text-gray-500 text-center py-8">Loading papers...</p>
-            ) : papers.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">
-                No recent papers found from this institution.
-              </p>
             ) : (
-              <div className="space-y-4">
-                {papers.map((paper) => (
-                  <PaperCard
-                    key={paper.id}
-                    paper={paper}
-                    onSave={() => sendFeedback(paper.id, "save")}
-                    showActions={true}
-                  />
-                ))}
-              </div>
+              <>
+                {/* New from my university */}
+                <div className="mb-8">
+                  <h3 className="text-md font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-blue-600 rounded-full" />
+                    New from this university
+                  </h3>
+                  {newPapers.length === 0 ? (
+                    <p className="text-gray-400 text-sm py-4">
+                      No recent papers found from this institution.
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {newPapers.map((paper) => (
+                        <PaperCard
+                          key={paper.id}
+                          paper={paper}
+                          onSave={() => sendFeedback(paper.id, "save")}
+                          showActions={true}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Related elsewhere */}
+                <div>
+                  <h3 className="text-md font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-green-600 rounded-full" />
+                    Related elsewhere
+                  </h3>
+                  <p className="text-xs text-gray-400 mb-3">
+                    Papers from other institutions similar to this university&apos;s work and your interests.
+                  </p>
+                  {relatedPapers.length === 0 ? (
+                    <p className="text-gray-400 text-sm py-4">
+                      No related papers found yet.
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {relatedPapers.map((paper) => (
+                        <PaperCard
+                          key={paper.id}
+                          paper={paper}
+                          onSave={() => sendFeedback(paper.id, "save")}
+                          showActions={true}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
             )}
           </div>
         )}
