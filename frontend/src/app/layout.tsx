@@ -13,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Research Radar",
-  description: "Personalized research paper discovery and tracking",
+  title: "Research Radar — Personalized Paper Discovery",
+  description:
+    "Stop drowning in arXiv. Research Radar learns your interests and delivers a personalized, explainable feed of research papers.",
 };
 
 export default function RootLayout({
@@ -23,9 +24,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="scroll-smooth">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
       </body>

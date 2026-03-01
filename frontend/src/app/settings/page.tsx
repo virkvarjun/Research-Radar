@@ -11,9 +11,9 @@ import {
 } from "@/lib/api";
 
 const ROLES = [
-  { id: "student", label: "Student" },
-  { id: "builder", label: "Builder" },
-  { id: "lab", label: "Lab Researcher" },
+  { id: "student", label: "Student", emoji: "🎓" },
+  { id: "builder", label: "Builder", emoji: "🛠️" },
+  { id: "lab", label: "Lab Researcher", emoji: "🔬" },
 ];
 
 export default function SettingsPage() {
@@ -44,7 +44,7 @@ export default function SettingsPage() {
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch {
-      // ignore
+      /* ignore */
     } finally {
       setSaving(false);
     }
@@ -83,8 +83,10 @@ export default function SettingsPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <main className="max-w-2xl mx-auto px-4 py-6">
-          <p className="text-gray-500 text-center py-12">Loading...</p>
+        <main className="max-w-2xl mx-auto px-4 py-8">
+          <div className="flex items-center justify-center py-20">
+            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          </div>
         </main>
       </div>
     );
@@ -94,10 +96,14 @@ export default function SettingsPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <main className="max-w-2xl mx-auto px-4 py-6">
-          <p className="text-red-500 text-center py-12">
-            Failed to load settings. Is the backend running?
-          </p>
+        <main className="max-w-2xl mx-auto px-4 py-8">
+          <div className="text-center py-20">
+            <div className="text-5xl mb-4">⚠️</div>
+            <p className="text-lg font-medium text-gray-900 mb-2">
+              Failed to load settings
+            </p>
+            <p className="text-sm text-gray-400">Is the backend running?</p>
+          </div>
         </main>
       </div>
     );
@@ -106,23 +112,29 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <main className="max-w-2xl mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Settings</h1>
+      <main className="max-w-2xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+          <p className="text-sm text-gray-400 mt-1">
+            Manage your preferences and profile
+          </p>
+        </div>
 
-        {/* Role Toggle */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
+        {/* Role */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-4">
           <h2 className="text-sm font-semibold text-gray-900 mb-3">Role</h2>
           <div className="flex gap-2">
             {ROLES.map((r) => (
               <button
                 key={r.id}
                 onClick={() => setSettings({ ...settings, role: r.id })}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5 ${
                   settings.role === r.id
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
+                <span>{r.emoji}</span>
                 {r.label}
               </button>
             ))}
@@ -130,14 +142,14 @@ export default function SettingsPage() {
         </div>
 
         {/* Digest */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
+        <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-sm font-semibold text-gray-900">
                 Daily Email Digest
               </h2>
-              <p className="text-xs text-gray-500">
-                Receive up to 5 papers daily
+              <p className="text-xs text-gray-400 mt-0.5">
+                Receive up to 5 personalized papers daily
               </p>
             </div>
             <button
@@ -147,13 +159,15 @@ export default function SettingsPage() {
                   digest_enabled: !settings.digest_enabled,
                 })
               }
-              className={`w-12 h-6 rounded-full transition-colors ${
+              className={`relative w-12 h-6 rounded-full transition-colors ${
                 settings.digest_enabled ? "bg-blue-600" : "bg-gray-300"
               }`}
             >
               <div
-                className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${
-                  settings.digest_enabled ? "translate-x-6" : "translate-x-0.5"
+                className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                  settings.digest_enabled
+                    ? "translate-x-6"
+                    : "translate-x-0.5"
                 }`}
               />
             </button>
@@ -161,36 +175,49 @@ export default function SettingsPage() {
         </div>
 
         {/* Institutions */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
+        <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-4">
           <h2 className="text-sm font-semibold text-gray-900 mb-3">
             My Institutions
           </h2>
-          {settings.institutions.map((inst) => (
-            <div
-              key={inst.id}
-              className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"
-            >
-              <span className="text-sm text-gray-700">{inst.name}</span>
-              <button
-                onClick={() => removeInstitution(inst.id)}
-                className="text-red-500 text-xs hover:underline"
-              >
-                Remove
-              </button>
+          {settings.institutions.length > 0 ? (
+            <div className="space-y-2 mb-4">
+              {settings.institutions.map((inst) => (
+                <div
+                  key={inst.id}
+                  className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-xl"
+                >
+                  <span className="text-sm text-gray-700">{inst.name}</span>
+                  <button
+                    onClick={() => removeInstitution(inst.id)}
+                    className="text-red-400 text-xs hover:text-red-600 transition-colors font-medium"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
             </div>
-          ))}
-          <div className="flex gap-2 mt-3">
+          ) : (
+            <p className="text-xs text-gray-400 mb-4">
+              No institutions added yet.
+            </p>
+          )}
+          <div className="flex gap-2">
             <input
               type="text"
               value={instQuery}
               onChange={(e) => setInstQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleInstSearch())}
-              placeholder="Search institution..."
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleInstSearch();
+                }
+              }}
+              placeholder="Search institution…"
+              className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
             />
             <button
               onClick={handleInstSearch}
-              className="px-3 py-2 bg-gray-100 text-gray-700 text-sm rounded-md hover:bg-gray-200"
+              className="px-4 py-2.5 bg-gray-100 text-gray-600 text-sm font-medium rounded-xl hover:bg-gray-200 transition-colors"
             >
               Search
             </button>
@@ -201,7 +228,7 @@ export default function SettingsPage() {
                 <button
                   key={inst.id}
                   onClick={() => addInstitution(inst)}
-                  className="w-full text-left p-2 text-sm hover:bg-gray-50 rounded"
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 rounded-xl transition-colors"
                 >
                   {inst.name}
                   {inst.country && (
@@ -213,16 +240,17 @@ export default function SettingsPage() {
           )}
         </div>
 
+        {/* Save */}
         <button
           onClick={handleSave}
           disabled={saving}
-          className={`w-full py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`w-full py-3 rounded-xl text-sm font-medium transition-all ${
             saved
-              ? "bg-green-100 text-green-700"
-              : "bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+              ? "bg-green-50 text-green-700 border border-green-200"
+              : "bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 shadow-sm"
           }`}
         >
-          {saving ? "Saving..." : saved ? "Saved!" : "Save Settings"}
+          {saving ? "Saving…" : saved ? "✓ Saved!" : "Save Settings"}
         </button>
       </main>
     </div>

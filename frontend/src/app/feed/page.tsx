@@ -16,7 +16,7 @@ export default function FeedPage() {
     try {
       const data = await getFeed(refresh);
       setPapers(data.papers);
-    } catch (err) {
+    } catch {
       setError("Failed to load feed. Is the backend running?");
     } finally {
       setLoading(false);
@@ -32,7 +32,6 @@ export default function FeedPage() {
       await sendFeedback(paperId, action);
       setPapers((prev) => prev.filter((p) => p.id !== paperId));
     } catch {
-      // Optimistically remove even if API fails
       setPapers((prev) => prev.filter((p) => p.id !== paperId));
     }
   }
@@ -40,29 +39,45 @@ export default function FeedPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <main className="max-w-3xl mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Your Feed</h1>
+      <main className="max-w-3xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Your Feed</h1>
+            <p className="text-sm text-gray-400 mt-1">
+              Papers ranked by your interests
+            </p>
+          </div>
           <button
             onClick={() => loadFeed(true)}
             disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm"
           >
-            {loading ? "Loading..." : "Refresh"}
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Loading
+              </span>
+            ) : (
+              "↻ Refresh"
+            )}
           </button>
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4 text-sm">
+          <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-6 text-sm">
             {error}
           </div>
         )}
 
         {!loading && papers.length === 0 && !error && (
-          <div className="text-center py-12 text-gray-500">
-            <p className="text-lg mb-2">No papers in your feed yet.</p>
-            <p className="text-sm">
-              Complete onboarding or wait for the daily ingestion job.
+          <div className="text-center py-20">
+            <div className="text-5xl mb-4">📭</div>
+            <p className="text-lg font-medium text-gray-900 mb-2">
+              No papers in your feed yet
+            </p>
+            <p className="text-sm text-gray-400 max-w-sm mx-auto">
+              Complete onboarding or wait for the daily ingestion job to populate
+              your personalized feed.
             </p>
           </div>
         )}
