@@ -19,8 +19,20 @@ html {
 
 body {
   font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  color: #111827;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure inputs always have visible text */
+input,
+textarea,
+select {
+  color: #111827;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af;
 }
 
 /* Custom scrollbar */
