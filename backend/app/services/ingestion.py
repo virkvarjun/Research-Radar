@@ -11,6 +11,7 @@ from app.adapters.openalex import title_hash
 from app.models import Paper
 from app.schemas.common import NormalizedPaper
 from app.services.embeddings import embed_text, paper_text_for_embedding
+from app.services.evidence import extract_evidence
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +61,11 @@ async def ingest_paper(
         text = paper_text_for_embedding(paper.title, paper.abstract)
         embedding = await embed_text(text)
 
+    # Extract evidence from abstract (best-effort; PDF extraction enriches later)
+    evidence = None
+    if paper.abstract:
+        evidence = extract_evidence(paper.abstract)
+
     db_paper = Paper(
         title=paper.title,
         abstract=paper.abstract,
@@ -74,6 +80,7 @@ async def ingest_paper(
         categories=paper.categories,
         institution_ids=paper.institution_ids,
         embedding=embedding,
+        evidence=evidence,
     )
     db.add(db_paper)
     await db.flush()

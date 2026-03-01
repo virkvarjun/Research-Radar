@@ -12,14 +12,17 @@ logger = logging.getLogger(__name__)
 
 
 def generate_feedback_url(user_id: UUID, paper_id: UUID, action: str) -> str:
-    """Generate a signed feedback URL for email click tracking."""
+    """Generate a signed feedback URL for email click tracking.
+
+    Points to the backend's /api/feedback endpoint (not the frontend).
+    """
     payload = f"{user_id}:{paper_id}:{action}"
     signature = hmac.new(
         settings.feedback_secret.encode(),
         payload.encode(),
         hashlib.sha256,
     ).hexdigest()[:16]
-    return f"{settings.app_url}/api/feedback?u={user_id}&p={paper_id}&a={action}&sig={signature}"
+    return f"{settings.backend_url}/api/feedback?u={user_id}&p={paper_id}&a={action}&sig={signature}"
 
 
 def verify_feedback_signature(user_id: str, paper_id: str, action: str, signature: str) -> bool:
@@ -49,7 +52,7 @@ def render_digest_html(papers: list[dict], user_id: UUID) -> str:
 
         paper_id = paper.get("id", "")
         save_url = generate_feedback_url(user_id, paper_id, "save")
-        skip_url = generate_feedback_url(user_id, paper_id, "skip")
+        not_relevant_url = generate_feedback_url(user_id, paper_id, "not_relevant")
         view_url = f"{settings.app_url}/paper/{paper_id}"
 
         paper_rows += f"""
@@ -62,7 +65,8 @@ def render_digest_html(papers: list[dict], user_id: UUID) -> str:
             <p style="margin: 0 0 8px 0; font-size: 14px; color: #374151;">{abstract}</p>
             <div>
               <a href="{save_url}" style="display: inline-block; padding: 4px 12px; background: #2563eb; color: white; border-radius: 4px; text-decoration: none; font-size: 13px; margin-right: 8px;">Save</a>
-              <a href="{skip_url}" style="display: inline-block; padding: 4px 12px; background: #f3f4f6; color: #374151; border-radius: 4px; text-decoration: none; font-size: 13px;">Skip</a>
+              <a href="{not_relevant_url}" style="display: inline-block; padding: 4px 12px; background: #fef2f2; color: #dc2626; border-radius: 4px; text-decoration: none; font-size: 13px; margin-right: 8px;">Not interested</a>
+              <a href="{settings.app_url}/feed" style="display: inline-block; padding: 4px 12px; background: #f3f4f6; color: #374151; border-radius: 4px; text-decoration: none; font-size: 13px;">View feed</a>
             </div>
           </td>
         </tr>

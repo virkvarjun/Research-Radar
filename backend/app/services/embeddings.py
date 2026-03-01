@@ -6,6 +6,7 @@ from typing import Optional
 import numpy as np
 
 from app.config import settings
+from app.services.rate_limit import embedding_limiter
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,7 @@ def _embed_openai(texts: list[str]) -> list[list[float]]:
     all_embeddings = []
     batch_size = 512
     for i in range(0, len(texts), batch_size):
+        embedding_limiter.wait_if_needed("openai_embed")
         batch = texts[i : i + batch_size]
         response = client.embeddings.create(
             model=settings.embedding_model,

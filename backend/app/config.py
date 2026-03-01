@@ -30,6 +30,7 @@ class Settings(BaseSettings):
 
     # App
     app_url: str = "http://localhost:3000"
+    backend_url: str = "http://localhost:8000"
     feedback_secret: str = "feedback-signing-secret-change-me"
 
     # Ranking
