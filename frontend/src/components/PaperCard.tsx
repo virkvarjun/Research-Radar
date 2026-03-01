@@ -58,11 +58,17 @@ export default function PaperCard({
 
       {paper.why_matched && (
         <div className="text-xs text-gray-400 mb-3">
-          <span className="font-medium">Match:</span>{" "}
-          score {(paper.why_matched as Record<string, number>).total_score?.toFixed(3)}
-          {(paper.why_matched as Record<string, number>).user_similarity > 0 && (
-            <span> · interest {((paper.why_matched as Record<string, number>).user_similarity * 100).toFixed(0)}%</span>
-          )}
+          <span className="font-medium">Why matched:</span>{" "}
+          {(() => {
+            const m = paper.why_matched as Record<string, number>;
+            const parts: string[] = [];
+            if (m.total_score != null) parts.push(`score ${m.total_score.toFixed(3)}`);
+            if (m.user_similarity > 0) parts.push(`interest ${(m.user_similarity * 100).toFixed(0)}%`);
+            if (m.thread_similarity > 0) parts.push(`thread ${(m.thread_similarity * 100).toFixed(0)}%`);
+            if (m.novelty > 0) parts.push(`novelty ${(m.novelty * 100).toFixed(0)}%`);
+            if (m.role_boost > 0) parts.push(`role boost +${m.role_boost.toFixed(2)}`);
+            return parts.length > 0 ? parts.join(" · ") : "relevance match";
+          })()}
         </div>
       )}
 
